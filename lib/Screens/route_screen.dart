@@ -2,124 +2,108 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
-import '../data/place_data.dart';
-
 class RouteScreen extends StatefulWidget {
-  final Place place;
+  final LatLng start;
+  final LatLng end;
 
-  const RouteScreen({super.key, required this.place});
+  const RouteScreen({required this.start, required this.end, super.key});
 
   @override
   State<RouteScreen> createState() => _RouteScreenState();
 }
 
 class _RouteScreenState extends State<RouteScreen> {
-  List<LatLng> roadRoute = [];
-  bool isLoading = true;
+  List<LatLng> polylinePoints = [];
+
+  final String googleApiKey = 'AIzaSyA7ENpBpwrOCSKAzj7Wv7CsprD5sdRJCfg';
 
   @override
   void initState() {
     super.initState();
-    fetchRoadRoute();
+    getRoute();
   }
 
-  Future<void> fetchRoadRoute() async {
-    final regionCenter = getRegionCenter(widget.place.region);
-    final destination = LatLng(widget.place.latitude, widget.place.longitude);
+  Future<void> getRoute() async {
+    PolylinePoints polylinePointsTool = PolylinePoints();
 
-    const apiKey = '5b3ce3597851110001cf6248438adc3334084fde94224ac09fe688bf';
-    final url =
-        'https://api.openrouteservice.org/v2/directions/driving-car?api_key=$apiKey&start=${regionCenter.longitude},${regionCenter.latitude}&end=${destination.longitude},${destination.latitude}';
+    final result = await polylinePointsTool.getRouteBetweenCoordinates(
+      googleApiKey,
+      PointLatLng(widget.start.latitude, widget.start.longitude),
+      PointLatLng(widget.end.latitude, widget.end.longitude),
+      travelMode: TravelMode.driving,
+      request: null,
+    );
 
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final coords = data['features'][0]['geometry']['coordinates'];
-
+    if (result.points.isNotEmpty) {
       setState(() {
-        roadRoute = coords.map<LatLng>((c) => LatLng(c[1], c[0])).toList();
-        isLoading = false;
+        polylinePoints =
+            result.points.map((e) => LatLng(e.latitude, e.longitude)).toList();
       });
     } else {
-      print('Ошибка при загрузке маршрута: ${response.body}');
-    }
-  }
-
-  LatLng getRegionCenter(String region) {
-    switch (region) {
-      case 'Абайская':
-        return LatLng(49.8034, 82.6998);
-      case 'Алматинская':
-        return LatLng(43.439753608575, 76.98799006287493);
-      // Добавь свои регионы
-      default:
-        return LatLng(48.0196, 66.9237);
+      print("Не удалось получить маршрут: ${result.errorMessage}");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final regionCenter = getRegionCenter(widget.place.region);
-
     return Scaffold(
-      appBar: AppBar(title: Text('Маршрут к ${widget.place.name}')),
-      body:
-          isLoading
-              ? Center(child: CircularProgressIndicator())
-              : FlutterMap(
-                options: MapOptions(center: regionCenter, zoom: 6),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.example.nomads_tour',
-                  ),
-                  PolylineLayer(
-                    polylines: [
-                      Polyline(
-                        points: roadRoute,
-                        color: Colors.blue,
-                        strokeWidth: 5,
-                      ),
-                    ],
-                  ),
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: regionCenter,
-                        width: 40,
-                        height: 40,
-                        child: Icon(Icons.location_city, color: Colors.red),
-                      ),
-                      Marker(
-                        point: LatLng(
-                          widget.place.latitude,
-                          widget.place.longitude,
-                        ),
-                        width: 40,
-                        height: 40,
-                        child: Icon(Icons.place, color: Colors.green),
-                      ),
-                    ],
-                  ),
-                ],
+      appBar: AppBar(title: const Text("Маршрут")),
+      body: FlutterMap(
+        options: MapOptions(center: widget.start, zoom: 10),
+        children: [
+          TileLayer(
+            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            userAgentPackageName: 'com.example.app',
+          ),
+          MarkerLayer(
+            markers: [
+              Marker(
+                width: 40,
+                height: 40,
+                point: widget.start,
+                child: const Icon(Icons.location_on, color: Colors.green),
               ),
+              Marker(
+                width: 40,
+                height: 40,
+                point: widget.end,
+                child: const Icon(Icons.flag, color: Colors.red),
+              ),
+            ],
+          ),
+          if (polylinePoints.isNotEmpty)
+            PolylineLayer(
+              polylines: [
+                Polyline(
+                  points: polylinePoints,
+                  strokeWidth: 4,
+                  color: Colors.blue,
+                ),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }
 
-LatLng getRegionCenter(String regionName) {
-  switch (regionName) {
-    case 'Алматинская область':
-      return LatLng(43.2220, 76.8512);
-    case 'Астана':
-      return LatLng(51.1605, 71.4704);
-    case 'Абайская область':
-      return LatLng(50.4111, 80.2278);
-    default:
-      return LatLng(48.0196, 66.9237); // центр Казахстана
+Future<LatLng?> getRegionCenter(String regionName) async {
+  final url = Uri.parse(
+    'https://maps.googleapis.com/maps/api/geocode/json?address=$regionName&key=AIzaSyA7ENpBpwrOCSKAzj7Wv7CsprD5sdRJCfg',
+  );
+
+  final response = await http.get(url);
+  final data = json.decode(response.body);
+
+  if (data['status'] == 'OK') {
+    final location = data['results'][0]['geometry']['location'];
+    return LatLng(location['lat'], location['lng']);
+  } else {
+    print("Ошибка при геокодинге: ${data['status']}");
+    return null;
   }
 }
