@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "950595416475",
+    "project_id": "nomadstour-cc29c",
+    "storage_bucket": "nomadstour-cc29c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:950595416475:android:5361d87e3b7cdf99cef13e",
+        "android_client_info": {
+          "package_name": "com.example.nomads_tour"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWJxkxjv-3-UEd0vupYqNuFhsfU0t3IeE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
