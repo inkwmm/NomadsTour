@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 class RouteScreen extends StatefulWidget {
@@ -35,7 +32,6 @@ class _RouteScreenState extends State<RouteScreen> {
       PointLatLng(widget.start.latitude, widget.start.longitude),
       PointLatLng(widget.end.latitude, widget.end.longitude),
       travelMode: TravelMode.driving,
-      request: null,
     );
 
     if (result.points.isNotEmpty) {
@@ -88,22 +84,5 @@ class _RouteScreenState extends State<RouteScreen> {
         ],
       ),
     );
-  }
-}
-
-Future<LatLng?> getRegionCenter(String regionName) async {
-  final url = Uri.parse(
-    'https://maps.googleapis.com/maps/api/geocode/json?address=$regionName&key=AIzaSyA7ENpBpwrOCSKAzj7Wv7CsprD5sdRJCfg',
-  );
-
-  final response = await http.get(url);
-  final data = json.decode(response.body);
-
-  if (data['status'] == 'OK') {
-    final location = data['results'][0]['geometry']['location'];
-    return LatLng(location['lat'], location['lng']);
-  } else {
-    print("Ошибка при геокодинге: ${data['status']}");
-    return null;
   }
 }
