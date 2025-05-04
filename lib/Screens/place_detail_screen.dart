@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nomads_tour/Screens/route_screen.dart';
 
 import '../data/place_data.dart';
 
@@ -62,10 +63,11 @@ class PlaceDetailScreen extends StatelessWidget {
                 icon: Icon(Icons.map),
                 label: Text('Показать маршрут'),
                 onPressed: () {
-                  Navigator.pushNamed(
+                  Navigator.push(
                     context,
-                    '/route',
-                    arguments: place.routePoints,
+                    MaterialPageRoute(
+                      builder: (context) => RouteScreen(place: place),
+                    ),
                   );
                 },
               ),

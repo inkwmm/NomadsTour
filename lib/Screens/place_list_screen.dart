@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/place_data.dart';
+import 'place_detail_screen.dart';
 
 class PlacesListScreen extends StatefulWidget {
   @override
@@ -77,7 +78,12 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
                   title: Text(place.name),
                   subtitle: Text('${place.region} — ${place.description}'),
                   onTap: () {
-                    Navigator.pushNamed(context, '/place-detail');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PlaceDetailScreen(place: place),
+                      ),
+                    );
                   },
                 );
               },

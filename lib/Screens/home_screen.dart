@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../data/place_data.dart';
 import 'blog_screen.dart';
 import 'categories_screen.dart';
+import 'place_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -20,78 +22,69 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         body: TabBarView(
-          children: [
-            CategoriesScreen(), // экран категорий
-            RecommendationsScreen(), // экран рекомендаций
-            BlogScreen(), // экран блога
-          ],
+          children: [CategoriesScreen(), RecommendationsScreen(), BlogScreen()],
         ),
       ),
     );
   }
 }
 
-// Экраны внутри вкладок:
-
 class RecommendationsScreen extends StatelessWidget {
-  final List<Map<String, String>> recommendedPlaces = [
-    {
-      'title': 'Жидебай — культурное сердце Казахстана',
-      'region': 'Абайская область',
-    },
-    {
-      'title': 'Пещера Коныр-Аулие — духовное место',
-      'region': 'Абайская область',
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: recommendedPlaces.length,
-      itemBuilder: (context, index) {
-        final place = recommendedPlaces[index];
-        return Card(
-          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          elevation: 5,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: InkWell(
-            onTap: () {
-              // Здесь можно будет сделать переход на страницу места
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        place['title']!,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        place['region']!,
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+    final recommendedPlaces = places.take(3).toList();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Рекомендации'), centerTitle: true),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: recommendedPlaces.length,
+        itemBuilder: (context, index) {
+          final place = recommendedPlaces[index];
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-          ),
-        );
-      },
+            elevation: 4,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PlaceDetailScreen(place: place),
+                  ),
+                );
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Image.asset(place.image, fit: BoxFit.cover),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          place.name,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          place.description,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

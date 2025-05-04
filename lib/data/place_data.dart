@@ -1,5 +1,3 @@
-import 'package:latlong2/latlong.dart';
-
 class Place {
   final String id;
   final String name;
@@ -9,7 +7,9 @@ class Place {
   final List<Map<String, dynamic>> tours;
   final List<Map<String, dynamic>> hotels;
   final List<Map<String, dynamic>> cafes;
-  final List<LatLng> routePoints;
+  final double latitude;
+  final double longitude;
+  final String image;
 
   Place({
     required this.id,
@@ -20,7 +20,9 @@ class Place {
     required this.tours,
     required this.hotels,
     required this.cafes,
-    required this.routePoints,
+    required this.latitude,
+    required this.longitude,
+    required this.image,
   });
 }
 
@@ -49,10 +51,9 @@ final List<Place> places = [
     cafes: [
       {'name': 'Кафе "Абай"', 'rating': 7, 'price': 300},
     ],
-    routePoints: [
-      LatLng(51.1694, 71.4491), // примерные точки
-      LatLng(50.2820, 77.0736),
-    ],
+    latitude: 51.1694,
+    longitude: 71.4491,
+    image: 'assets/images/zhidebay.jpg',
   ),
   Place(
     id: '2',
@@ -78,10 +79,9 @@ final List<Place> places = [
     cafes: [
       {'name': 'Кафе "Абай"', 'rating': 7, 'price': 300},
     ],
-    routePoints: [
-      LatLng(51.1694, 71.4491), // примерные точки
-      LatLng(50.2820, 77.0736),
-    ],
+    latitude: 47.8117,
+    longitude: 78.3739,
+    image: 'assets/images/konyr-aulie.webp',
   ),
   Place(
     id: '3',
@@ -107,9 +107,8 @@ final List<Place> places = [
     cafes: [
       {'name': 'Кафе "Абай"', 'rating': 7, 'price': 300},
     ],
-    routePoints: [
-      LatLng(51.1694, 71.4491), // примерные точки
-      LatLng(50.2820, 77.0736),
-    ],
+    latitude: 43.36314953826513,
+    longitude: 79.04998070276436,
+    image: 'assets/images/charyn canyon.jpg',
   ),
 ];
