@@ -2,6 +2,8 @@ class Place {
   final String id;
   final String name;
   final String region;
+  final double regionLatitude;
+  final double regionLongitude;
   final String description;
   final String category;
   final List<Map<String, dynamic>> tours;
@@ -15,6 +17,8 @@ class Place {
     required this.id,
     required this.name,
     required this.region,
+    required this.regionLatitude,
+    required this.regionLongitude,
     required this.description,
     required this.category,
     required this.tours,
@@ -31,6 +35,8 @@ final List<Place> places = [
     id: '1',
     name: 'Жидебай, заповедник',
     region: 'Абайская область',
+    regionLatitude: 43.238949,
+    regionLongitude: 76.889709,
     description: 'Историческое место, где жил и творил Абай Кунанбаев...',
     category: 'culture',
     tours: [
@@ -59,6 +65,8 @@ final List<Place> places = [
     id: '2',
     name: 'Коныр-Аулие',
     region: 'Абайская область',
+    regionLatitude: 43.238949,
+    regionLongitude: 76.889709,
     description: '85000',
     category: 'religious',
     tours: [
@@ -87,6 +95,8 @@ final List<Place> places = [
     id: '3',
     name: 'Чарынский каньон',
     region: 'Алматинская область',
+    regionLatitude: 43.238949,
+    regionLongitude: 76.889709,
     description:
         'Чарынский каньон сформировался около 12 миллионов лет назад из осадочных пород.',
     category: 'eco',

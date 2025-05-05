@@ -65,7 +65,9 @@ class PlaceDetailScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => RouteMapPage()),
+                    MaterialPageRoute(
+                      builder: (_) => RouteMapPage(place: place),
+                    ),
                   );
                 },
               ),

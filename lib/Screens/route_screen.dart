@@ -5,18 +5,20 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
-void main() {
-  runApp(MaterialApp(home: RouteMapPage()));
-}
+import '../data/place_data.dart';
 
 class RouteMapPage extends StatefulWidget {
+  final Place place;
+
+  const RouteMapPage({super.key, required this.place});
+
   @override
   _RouteMapPageState createState() => _RouteMapPageState();
 }
 
 class _RouteMapPageState extends State<RouteMapPage> {
-  final LatLng origin = LatLng(43.238949, 76.889709); // Алматы
-  final LatLng destination = LatLng(43.353710, 79.068627); // Шарын
+  late LatLng origin;
+  late LatLng destination;
 
   GoogleMapController? mapController;
   Set<Polyline> polylines = {};
@@ -25,6 +27,10 @@ class _RouteMapPageState extends State<RouteMapPage> {
   @override
   void initState() {
     super.initState();
+
+    origin = LatLng(widget.place.regionLatitude, widget.place.regionLongitude);
+    destination = LatLng(widget.place.latitude, widget.place.longitude);
+
     fetchRoute();
   }
 
@@ -40,7 +46,6 @@ class _RouteMapPageState extends State<RouteMapPage> {
       final points = data["routes"][0]["overview_polyline"]["points"];
 
       final decodedPoints = PolylinePoints().decodePolyline(points);
-
       final polylineCoordinates =
           decodedPoints.map((p) => LatLng(p.latitude, p.longitude)).toList();
 
@@ -60,14 +65,14 @@ class _RouteMapPageState extends State<RouteMapPage> {
         ]);
       });
     } else {
-      print("Ошибка при получении маршрута");
+      print("Ошибка при получении маршрута: ${response.statusCode}");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Маршрут")),
+      appBar: AppBar(title: Text("Маршрут до ${widget.place.name}")),
       body: GoogleMap(
         initialCameraPosition: CameraPosition(target: origin, zoom: 8),
         onMapCreated: (controller) => mapController = controller,
