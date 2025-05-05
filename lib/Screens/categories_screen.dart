@@ -28,7 +28,6 @@ class CategoriesScreen extends StatelessWidget {
                 title: Text(category['title']!),
                 trailing: Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  // Здесь позже сделаем переход на список мест
                   Navigator.pushNamed(
                     context,
                     '/places',

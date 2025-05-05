@@ -1,87 +1,78 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 
-class RouteScreen extends StatefulWidget {
-  final LatLng start;
-  final LatLng end;
-
-  const RouteScreen({required this.start, required this.end, super.key});
-
-  @override
-  State<RouteScreen> createState() => _RouteScreenState();
+void main() {
+  runApp(MaterialApp(home: RouteMapPage()));
 }
 
-class _RouteScreenState extends State<RouteScreen> {
-  List<LatLng> polylinePoints = [];
+class RouteMapPage extends StatefulWidget {
+  @override
+  _RouteMapPageState createState() => _RouteMapPageState();
+}
 
-  final String googleApiKey = 'AIzaSyA7ENpBpwrOCSKAzj7Wv7CsprD5sdRJCfg';
+class _RouteMapPageState extends State<RouteMapPage> {
+  final LatLng origin = LatLng(43.238949, 76.889709); // Алматы
+  final LatLng destination = LatLng(43.353710, 79.068627); // Шарын
+
+  GoogleMapController? mapController;
+  Set<Polyline> polylines = {};
+  Set<Marker> markers = {};
 
   @override
   void initState() {
     super.initState();
-    getRoute();
+    fetchRoute();
   }
 
-  Future<void> getRoute() async {
-    PolylinePoints polylinePointsTool = PolylinePoints();
-
-    final result = await polylinePointsTool.getRouteBetweenCoordinates(
-      googleApiKey,
-      PointLatLng(widget.start.latitude, widget.start.longitude),
-      PointLatLng(widget.end.latitude, widget.end.longitude),
-      travelMode: TravelMode.driving,
+  Future<void> fetchRoute() async {
+    final url = Uri.parse(
+      "http://localhost:3000/directions?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}",
     );
 
-    if (result.points.isNotEmpty) {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final points = data["routes"][0]["overview_polyline"]["points"];
+
+      final decodedPoints = PolylinePoints().decodePolyline(points);
+
+      final polylineCoordinates =
+          decodedPoints.map((p) => LatLng(p.latitude, p.longitude)).toList();
+
       setState(() {
-        polylinePoints =
-            result.points.map((e) => LatLng(e.latitude, e.longitude)).toList();
+        polylines.add(
+          Polyline(
+            polylineId: PolylineId("route"),
+            color: Colors.blue,
+            width: 5,
+            points: polylineCoordinates,
+          ),
+        );
+
+        markers.addAll([
+          Marker(markerId: MarkerId("origin"), position: origin),
+          Marker(markerId: MarkerId("destination"), position: destination),
+        ]);
       });
     } else {
-      print("Не удалось получить маршрут: ${result.errorMessage}");
+      print("Ошибка при получении маршрута");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Маршрут")),
-      body: FlutterMap(
-        options: MapOptions(center: widget.start, zoom: 10),
-        children: [
-          TileLayer(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-            userAgentPackageName: 'com.example.app',
-          ),
-          MarkerLayer(
-            markers: [
-              Marker(
-                width: 40,
-                height: 40,
-                point: widget.start,
-                child: const Icon(Icons.location_on, color: Colors.green),
-              ),
-              Marker(
-                width: 40,
-                height: 40,
-                point: widget.end,
-                child: const Icon(Icons.flag, color: Colors.red),
-              ),
-            ],
-          ),
-          if (polylinePoints.isNotEmpty)
-            PolylineLayer(
-              polylines: [
-                Polyline(
-                  points: polylinePoints,
-                  strokeWidth: 4,
-                  color: Colors.blue,
-                ),
-              ],
-            ),
-        ],
+      appBar: AppBar(title: Text("Маршрут")),
+      body: GoogleMap(
+        initialCameraPosition: CameraPosition(target: origin, zoom: 8),
+        onMapCreated: (controller) => mapController = controller,
+        polylines: polylines,
+        markers: markers,
       ),
     );
   }
